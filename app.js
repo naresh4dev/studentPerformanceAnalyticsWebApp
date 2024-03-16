@@ -27,7 +27,7 @@ app.get('/login',(req,res)=>{
     res.render('login');
 });
 
-app.post('login' ,async (req,res)=>{
+app.post('/login' ,async (req,res)=>{
     try {
         const {email,password} = req.body;
         const result = await loginQuery(email,password);
@@ -56,7 +56,7 @@ app.post('/signup',async (req,res)=>{
         }
         const result = await signUpQuery(email,password,userData);
         if(result.auth) {
-            res.redirect('/home');
+            res.redirect('/dashboard');
         } else {
             res.status(401).json({res:true,auth : false, msg:result.msg});
         }
