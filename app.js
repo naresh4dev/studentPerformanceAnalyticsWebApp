@@ -2,9 +2,10 @@ const express = require('express');
 const ejs = require('ejs');
 const corsOrigin = require('cors');
 const bodyParser = require('body-parser');
-const { loginQuery, signUpQuery } = require("./utils");
+const { default: axios } = require('axios');
+const { loginQuery, signUpQuery,addStudent, getTeacherMappedStudent,getOneStudent } = require("./utils");
+const {auth} = require('./connections/firebase');
 const app = express();
-
 
 const corsOptions = {
     origin: "*",
@@ -53,7 +54,6 @@ app.post('/signup',async (req,res)=>{
             lname : req.body.lname,
             phone : req.body.phone
         }
-        console.log(userData)
         const result = await signUpQuery(email,password,userData);
         if(result.auth) {
             res.redirect('/home');
@@ -65,12 +65,63 @@ app.post('/signup',async (req,res)=>{
     } 
 });
 
-app.get('/',(req,res)=>{
-    res.send("");
+app.get('/addStudent',(req,res)=>{
+    res.render("addStudent");
 });
 
-app.get('/dashboard',(req,res)=>{
-    res.send("Dashboard");
+app.post('/addStudent',async(req,res)=>{
+    try {
+        const teacherId = auth.currentUser.uid;
+        const studentDetails = req.body;
+        const result = await  addStudent(teacherId, studentDetails);
+        if(!result) {
+          throw new Error("Unable to add Student") 
+        } 
+        res.redirect('/dashboard');
+    } catch (e) {
+        console.log('Error',e);
+        res.status(500).send('Server error : '+e)
+    }
 });
 
-app.listen(3001)
+app.get('/predict/:studentID',async(req,res) =>{
+    try {
+        const studentDetails = await getOneStudent(req.params.studentID);
+        console.log(studentDetails);
+        const config = {
+            headers : {
+                "Content-Type" : "application/x-www-form-urlencoded"
+            }
+        }
+        const result = await axios.post("http://127.0.0.1:8000/predict", req.body, config);
+        if(result.status == 200) {
+            res.render('predictStudent', {"studentDetails" : studentDetails, "success" : result.data.success});
+        }
+    } catch (e) {
+        console.error("Error : ", e);
+    }
+});
+
+
+app.get('/dashboard',async (req,res)=>{
+    try {
+        const  userID = auth.currentUser.uid;
+        const  studentsList = await getTeacherMappedStudent(userID);
+        if (studentsList) {
+            res.render('dashboard', {"studentsList":studentsList, teacherDetail : auth.currentUser});    
+        } else {
+             res.render('dashboard',{"studentList":[], "teacherDetail": auth.currentUser});
+        }  
+    } catch (e) {
+        console.error("Error in dashboard: ",e);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.listen(3001, (err)=>{
+    if(!err) {
+        console.log("Server Intiated at port 3000.");
+    } else {
+        console.error("Error in intiating the server");
+    }
+})
