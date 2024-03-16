@@ -56,7 +56,7 @@ app.post('/signup',async (req,res)=>{
         }
         const result = await signUpQuery(email,password,userData);
         if(result.auth) {
-            res.redirect('/home');
+            res.redirect('/dashbaord');
         } else {
             res.status(401).json({res:true,auth : false, msg:result.msg});
         }

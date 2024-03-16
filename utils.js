@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 exports.loginQuery = async (email, password) => {
     try {
         const result = await signInWithEmailAndPassword(auth,email, password);
-        console.log(result);
+        
         if(result) {
             const dbRef = ref(db);
             const snapshot = await get(child(dbRef,`teachers/${result.user.uid}`));
@@ -29,7 +29,7 @@ exports.loginQuery = async (email, password) => {
 exports.signUpQuery = async (email,password, userData) => {
     try {
         const result = await createUserWithEmailAndPassword(auth,email, password);
-        console.log(result);
+        
         if(result) {
             console.log(result);
             const dbRef = ref(db);
