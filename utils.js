@@ -1,6 +1,6 @@
 const {app,auth, db} = require('./connections/firebase');
 const {signInWithEmailAndPassword, createUserWithEmailAndPassword} = require('firebase/auth');
-const {ref,get,set, child} = require('firebase/database');
+const {ref,get,set, child, update} = require('firebase/database');
 const { v4: uuidv4 } = require('uuid');
 
 exports.loginQuery = async (email, password) => {
@@ -71,8 +71,8 @@ exports.addStudent = async (userId, studentData) =>{
     try {
         const studentID  = uuidv4();
         console.log(userId , studentData)
-        const studentDbRef = ref(db, `students/${studentID}`);
-        await set(studentDbRef, studentData); 
+        const studentDbRef = ref(db, `students`);
+        await set(child(studentDbRef,`/${studentID}`), JSON.parse(studentData)); 
         const  dbRef = ref(db, `teachers/${userId}/students`);
         const studentList = await get(dbRef);
         if(!studentList.exists()){

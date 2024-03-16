@@ -4,20 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <style>
+        .student-box {
+            border: 1px solid black;
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome back! <%= locals.teacherDetail.email%></h1>
-    
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome back!, <%= locals.teacherDetail.email%></h1>
-    
+    <br>
+    <a href="/addStudent"><button>Add Student</button></a>
+    <h3>Students:</h3><br>
+    <div id="studentList">
+        <%locals.studentsList.forEach(student=>{ %>
+            <div class="student-box"> 
+                <p><%= student.name%> </p>
+                <a href="/predict/<%= student.key%>" ><button>View Student and Predict</button>  </a>
+            </div>
+        <% })%>
+    </div>
+
+    <script>
+      
+
+    </script>
 </body>
 </html>

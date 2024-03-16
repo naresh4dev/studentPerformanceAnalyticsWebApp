@@ -13,7 +13,7 @@ const corsOptions = {
     optionSuccessStatus: 200
 }
 
-app.use(bodyParser.urlencoded({extended : false}));
+app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static('public'));
 app.set('view engine', 'ejs')
 app.use(corsOrigin(corsOptions));
@@ -72,10 +72,16 @@ app.get('/addStudent',(req,res)=>{
 app.post('/addStudent',async(req,res)=>{
     
     try {
-        const teacherId = auth.currentUser.uid;
+        const teacherId = auth?.currentUser?.uid;
         const studentDetails = req.body;
-        console.log(studentDetails)
-        const result = await  addStudent(teacherId, studentDetails);
+        let objectWithQuotedKeys = {}
+        console.log(JSON.stringify(studentDetails))
+        // for (const key in studentDetails) {
+        //     if (studentDetails.hasOwnProperty(key)) {
+        //       objectWithQuotedKeys[`"${key}"`] = studentDetails[key];
+        //     }
+        //   }
+        const result = await  addStudent(teacherId, JSON.stringify(studentDetails));
         if(!result) {
           throw new Error("Unable to add Student") 
         } 
@@ -88,16 +94,25 @@ app.post('/addStudent',async(req,res)=>{
 
 app.get('/predict/:studentID',async(req,res) =>{
     try {
+        console.log(req.params.studentID);
         const studentDetails = await getOneStudent(req.params.studentID);
-        console.log(studentDetails);
+        const objectWithIntegerValues = {};
+        for (const key in studentDetails) {
+            if (studentDetails.hasOwnProperty(key)) {
+              const value = studentDetails[key];
+              objectWithIntegerValues[key] = /^\d+$/.test(value) ? parseInt(value) : value;
+            }
+          }
+        console.log(objectWithIntegerValues);
         const config = {
             headers : {
                 "Content-Type" : "application/x-www-form-urlencoded"
             }
         }
-        const result = await axios.post("http://127.0.0.1:8000/predict", req.body, config);
+        const result = await axios.post("http://127.0.0.1:8000/predict", objectWithIntegerValues, config);
         if(result.status == 200) {
-            res.render('predictStudent', {"studentDetails" : studentDetails, "success" : result.data.success});
+            console.log(result.data);
+            res.render('predictStudent', {"studentDetails" : studentDetails, "success" : result.data.success_rate});
         }
     } catch (e) {
         console.error("Error : ", e);
@@ -112,11 +127,11 @@ app.get('/dashboard',async (req,res)=>{
         if (studentsList) {
             res.render('dashboard', {"studentsList":studentsList, teacherDetail : auth.currentUser});    
         } else {
-             res.render('dashboard',{"studentList":[], "teacherDetail": auth.currentUser});
+             res.render('dashboard',{"studentsList":[], "teacherDetail": auth.currentUser});
         }  
     } catch (e) {
         console.error("Error in dashboard: ",e);
-        res.status(500).send("Internal Server Error");
+        res.redirect('/login')
     }
 });
 
@@ -126,4 +141,4 @@ app.listen(3001, (err)=>{
     } else {
         console.error("Error in intiating the server");
     }
-})
+});
