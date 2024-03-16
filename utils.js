@@ -33,7 +33,7 @@ exports.signUpQuery = async (email,password, userData) => {
         if(result) {
             console.log(result);
             const dbRef = ref(db);
-            await set(child(dbRef,`/teachers/${result.user.uid}`),{...userData, email, students : []});
+            await set(child(dbRef,`teachers/${result.user.uid}`),{...userData, email, students : []});
 
             return {auth : true, response : result}
         } else {

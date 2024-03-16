@@ -53,6 +53,7 @@ app.post('/signup',async (req,res)=>{
             lname : req.body.lname,
             phone : req.body.phone
         }
+        console.log(userData)
         const result = await signUpQuery(email,password,userData);
         if(result.auth) {
             res.redirect('/home');
@@ -64,7 +65,9 @@ app.post('/signup',async (req,res)=>{
     } 
 });
 
-
+app.get('/',(req,res)=>{
+    res.send("");
+});
 
 app.get('/dashboard',(req,res)=>{
     res.send("Dashboard");
