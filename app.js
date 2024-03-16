@@ -69,3 +69,5 @@ app.post('/signup',async (req,res)=>{
 app.get('/dashboard',(req,res)=>{
     res.send("Dashboard");
 });
+
+app.listen(3001)
