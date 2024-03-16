@@ -70,22 +70,23 @@ exports.getTeacherMappedStudent = async (userId) => {
 exports.addStudent = async (userId, studentData) =>{
     try {
         const studentID  = uuidv4();
-        const studentDbRef = ref(db, `/students/${studentID}`);
+        console.log(userId , studentData)
+        const studentDbRef = ref(db, `students/${studentID}`);
         await set(studentDbRef, studentData); 
-        const  dbRef = ref(db, `/teachers/${userId}/students`);
+        const  dbRef = ref(db, `teachers/${userId}/students`);
         const studentList = await get(dbRef);
         if(!studentList.exists()){
             const studentList = [studentID];
-            await set(dbRef, studentList);
+            await update(ref(db, `teachers/${userId}`), { students: studentList });
             return true
         } else {
             const studentIds = studentList.val();
             let  updatedList =[...studentIds , studentID];
-            await set(dbRef, updatedList);
+            await update(ref(db, `teachers/${userId}`), { students: studentList });
             return true
         }
     } catch (e) {
-        console.log("Error in adding student");
+        console.log("Error in adding student",e);
     }   
 }
 

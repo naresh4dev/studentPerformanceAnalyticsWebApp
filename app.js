@@ -70,9 +70,11 @@ app.get('/addStudent',(req,res)=>{
 });
 
 app.post('/addStudent',async(req,res)=>{
+    
     try {
         const teacherId = auth.currentUser.uid;
         const studentDetails = req.body;
+        console.log(studentDetails)
         const result = await  addStudent(teacherId, studentDetails);
         if(!result) {
           throw new Error("Unable to add Student") 
